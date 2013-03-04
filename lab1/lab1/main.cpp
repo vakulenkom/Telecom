@@ -5,31 +5,38 @@
 
 using namespace std;
 
-const int numberOfWords = 10000;
+const int numberOfWords = 1000;
 const int wordLenght = 100;
-int **sPrediction;
-int **s;
-double **r;
+int ***sPrediction;
+int ***s;
+double ***r;
+int numberOfBits;
 int numberOfSymbolsErrorsOverall;
+gsl_rng *pRNG = gsl_rng_alloc(gsl_rng_mt19937);
 
-void message(int **s,int i,int j, gsl_rng *pRNG){
+void message(){
     
-	for (int count1 = 0; count1 < j; count1++){
-        for (int count = 0; count < i; count++){
-            s[count][count1] = gsl_rng_uniform_int(pRNG,2);
-            if (s[count][count1] == 0) {
-                s[count][count1] = -1;
+	for (int i = 0; i < wordLenght; i++){
+        for (int j = 0; j < numberOfWords; j++){
+            for (int c = 0; c < numberOfBits; c++) {
+                s[j][i][c] = gsl_rng_uniform_int(pRNG,2);
+                if (s[j][i][c] == 0) {
+                    s[j][i][c] = -1;
+                }
             }
+            
         }
         
 	}
 }
 
-void noize(double **r, int **s, double SNR, gsl_rng *pRNG,int i, int j){
+void noize(double SNR){
 	double sigma = sqrt(pow(10,-SNR/10)/2);
-	for (int count1 = 0; count1 <j; count1++){
-        for (int count = 0; count < i; count++){
-            r[count][count1] = (double)s[count][count1] + gsl_ran_gaussian(pRNG,sigma);
+	for (int i = 0; i < wordLenght; i++){
+        for (int j = 0; j < numberOfWords; j++){
+            for (int c = 0; c < numberOfBits; c++) {
+                r[j][i][c] = (double)s[j][i][c] + gsl_ran_gaussian(pRNG,sigma);
+            }
         }
 	}
 }
@@ -37,14 +44,16 @@ void noize(double **r, int **s, double SNR, gsl_rng *pRNG,int i, int j){
 double errorProbabilityPerSymbol (){
     for (int numberOfSymbolInWord=0; numberOfSymbolInWord < wordLenght ; numberOfSymbolInWord++){
         for (int wordNumber = 0; wordNumber < numberOfWords; wordNumber++){
-            
-            if (r[wordNumber][numberOfSymbolInWord] >= 0)
-                sPrediction[wordNumber][numberOfSymbolInWord] = 1;
-            else
-                sPrediction[wordNumber][numberOfSymbolInWord] = -1;
-            
-            if (sPrediction[wordNumber][numberOfSymbolInWord]!=s[wordNumber][numberOfSymbolInWord]) {
-                numberOfSymbolsErrorsOverall += 1;
+            for (int bitPosition = 0; bitPosition < numberOfBits;  bitPosition++) {
+                if (r[wordNumber][numberOfSymbolInWord][bitPosition] >= 0)
+                    sPrediction[wordNumber][numberOfSymbolInWord][bitPosition] = 1;
+                else
+                    sPrediction[wordNumber][numberOfSymbolInWord][bitPosition] = -1;
+                
+                if (sPrediction[wordNumber][numberOfSymbolInWord][bitPosition]!=s[wordNumber][numberOfSymbolInWord][bitPosition] ) {
+                    numberOfSymbolsErrorsOverall += 1;
+                    break;
+                }
             }
         }
     }
@@ -55,28 +64,36 @@ double errorProbabilityPerSymbol (){
 
 int main(int argc, const char * argv[])
 {
-    ofstream outfile2 ("/Users/mike/Documents/Study/8semestr/telekom/lab1/lab1/example.txt");
+    ofstream outfile2 ("/Users/mike/Documents/Study/8semestr/Telecom/lab1/lab1/example.txt");
     
-    for (double SNR = -5; SNR <= 20; SNR += 0.2) {
-        numberOfSymbolsErrorsOverall = 0;
-        
-        sPrediction = (int**)malloc(numberOfWords*sizeof(int*));
-        s = (int**)malloc(numberOfWords*sizeof(int*));
-        r = (double**)malloc(numberOfWords*sizeof(double*));
-        
-        for (int masindex = 0; masindex <numberOfWords;masindex++){
-            sPrediction[masindex] = (int*)malloc(wordLenght*sizeof(int));
-            s[masindex] = (int*)malloc(wordLenght*sizeof(int));
-            r[masindex] = (double*)malloc(wordLenght*sizeof(double));
+    for (double SNR = -5; SNR <= 20; SNR += 0.1) {
+        outfile2 << SNR;
+        for (numberOfBits = 1; numberOfBits <= 4; numberOfBits++) {
+            
+            numberOfSymbolsErrorsOverall = 0;
+            
+            sPrediction = (int***)malloc(numberOfWords * wordLenght * sizeof(int*));
+            s = (int***)malloc(numberOfWords * wordLenght * sizeof(int*));
+            r = (double***)malloc(numberOfWords * wordLenght * sizeof(double*));
+            
+            for (int wordNumber = 0; wordNumber < numberOfWords ; wordNumber++){
+                sPrediction[wordNumber] = (int**)malloc(numberOfWords * wordLenght*sizeof(int));
+                s[wordNumber] = (int**)malloc(numberOfWords * wordLenght*sizeof(int));
+                r[wordNumber] = (double**)malloc(numberOfWords * wordLenght*sizeof(double));
+                for (int numberOfSymbolInWord = 0; numberOfSymbolInWord < wordLenght ; numberOfSymbolInWord++){
+                    sPrediction[wordNumber][numberOfSymbolInWord] = (int*)malloc(numberOfBits*sizeof(int));
+                    s[wordNumber][numberOfSymbolInWord] = (int*)malloc(numberOfBits*sizeof(int));
+                    r[wordNumber][numberOfSymbolInWord] = (double*)malloc(numberOfBits*sizeof(double));
+                }
+            }
+            
+            message();
+            noize(SNR);
+            errorProbabilityPerSymbol();
+                    
+            outfile2 << " " << errorProbabilityPerSymbol();
         }
-        gsl_rng *pRNG = gsl_rng_alloc(gsl_rng_mt19937);
-        
-        message(s,numberOfWords,wordLenght,pRNG);
-        noize(r,s,SNR,pRNG,numberOfWords,wordLenght);
-        errorProbabilityPerSymbol();
-                
-        outfile2 << SNR << " " << errorProbabilityPerSymbol() << "\n";
-        
+        outfile2 << "\n";
         cout << SNR << "\n";
     }
     
