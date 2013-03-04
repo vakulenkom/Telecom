@@ -7,7 +7,7 @@ using namespace std;
 
 const int numberOfWords = 10000;
 const int wordLenght = 100;
-int **s_ver;
+int **sPrediction;
 int **s;
 double **r;
 int numberOfSymbolsErrorsOverall;
@@ -39,11 +39,11 @@ double errorProbabilityPerSymbol (){
         for (int wordNumber = 0; wordNumber < numberOfWords; wordNumber++){
             
             if (r[wordNumber][numberOfSymbolInWord] >= 0)
-                s_ver[wordNumber][numberOfSymbolInWord] = 1;
+                sPrediction[wordNumber][numberOfSymbolInWord] = 1;
             else
-                s_ver[wordNumber][numberOfSymbolInWord] = -1;
+                sPrediction[wordNumber][numberOfSymbolInWord] = -1;
             
-            if (s_ver[wordNumber][numberOfSymbolInWord]!=s[wordNumber][numberOfSymbolInWord]) {
+            if (sPrediction[wordNumber][numberOfSymbolInWord]!=s[wordNumber][numberOfSymbolInWord]) {
                 numberOfSymbolsErrorsOverall += 1;
             }
         }
@@ -60,12 +60,12 @@ int main(int argc, const char * argv[])
     for (double SNR = -5; SNR <= 20; SNR += 0.2) {
         numberOfSymbolsErrorsOverall = 0;
         
-        s_ver = (int**)malloc(numberOfWords*sizeof(int*));
+        sPrediction = (int**)malloc(numberOfWords*sizeof(int*));
         s = (int**)malloc(numberOfWords*sizeof(int*));
         r = (double**)malloc(numberOfWords*sizeof(double*));
         
         for (int masindex = 0; masindex <numberOfWords;masindex++){
-            s_ver[masindex] = (int*)malloc(wordLenght*sizeof(int));
+            sPrediction[masindex] = (int*)malloc(wordLenght*sizeof(int));
             s[masindex] = (int*)malloc(wordLenght*sizeof(int));
             r[masindex] = (double*)malloc(wordLenght*sizeof(double));
         }
