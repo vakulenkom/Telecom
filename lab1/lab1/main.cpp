@@ -58,7 +58,7 @@ int main(int argc, const char * argv[])
     ofstream outfile2 ("/Users/mike/Documents/Study/8semestr/telekom/lab1/lab1/example.txt");
     
     for (double SNR = -5; SNR <= 20; SNR += 0.2) {
-        int numberOfSymbolsErrorsOverall = 0;
+        numberOfSymbolsErrorsOverall = 0;
         
         s_ver = (int**)malloc(numberOfWords*sizeof(int*));
         s = (int**)malloc(numberOfWords*sizeof(int*));
