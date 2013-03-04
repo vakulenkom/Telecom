@@ -10,4 +10,4 @@ set grid xtics lc rgb "#bbbbbb" lw 1 lt 0
 set ylabel "Error probability"
 set xlabel "SNR"
 
-plot '/Users/mike/Documents/Study/8semestr/telekom/lab1/lab1/example.txt' using 1:2 title "Err probability per word-SNR" with lines
+plot '/Users/mike/Documents/Study/8semestr/Telecom/lab1/lab1/example.txt' using 1:2 title "Err probability per word-SNR" with lines
