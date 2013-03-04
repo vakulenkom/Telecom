@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "main:main.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "noize(int*, double, gsl_rng*, int):main.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "n[0]">
+            </PersistentString>
+            <PersistentString
+               value = "n[1]">
+            </PersistentString>
+            <PersistentString
+               value = "n[2]">
+            </PersistentString>
+            <PersistentString
+               value = "r[2]">
+            </PersistentString>
+            <PersistentString
+               value = "n[3]">
+            </PersistentString>
+            <PersistentString
+               value = "n[4]">
+            </PersistentString>
+            <PersistentString
+               value = "s[0]">
+            </PersistentString>
+            <PersistentString
+               value = "s[1]">
+            </PersistentString>
+            <PersistentString
+               value = "s[2]">
+            </PersistentString>
+            <PersistentString
+               value = "r[1]">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>
