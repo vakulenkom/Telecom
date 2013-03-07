@@ -5,8 +5,8 @@
 
 using namespace std;
 
-const int numberOfWords = 1000;
-const int wordLenght = 100;
+const int numberOfWords = 5000;
+const int wordLenght = 50;
 int ***sPrediction;
 int ***s;
 double ***r;
@@ -19,7 +19,7 @@ void message(){
 	for (int i = 0; i < wordLenght; i++){
         for (int j = 0; j < numberOfWords; j++){
             for (int c = 0; c < numberOfBits; c++) {
-                s[j][i][c] = gsl_rng_uniform_int(pRNG,2);
+                s[j][i][c] = gsl_rng_uniform_int(pRNG,numberOfBits*2 +1);
                 if (s[j][i][c] == 0) {
                     s[j][i][c] = -1;
                 }
@@ -31,7 +31,7 @@ void message(){
 }
 
 void noize(double SNR){
-	double sigma = sqrt(pow(10,-SNR/10)/2);
+	double sigma = sqrt(pow(10, -SNR/10) / (2 * log(numberOfBits) ));
 	for (int i = 0; i < wordLenght; i++){
         for (int j = 0; j < numberOfWords; j++){
             for (int c = 0; c < numberOfBits; c++) {
