@@ -7,10 +7,11 @@ using namespace std;
 
 const int numberOfWords = 10000;
 const int wordLenght = 10 ;
-int **sPrediction;
-int **s;
+double **sPrediction;
+double **s;
 double **r;
 int M;
+double d;
 int numberOfSymbolsErrorsOverall;
 gsl_rng *pRNG = gsl_rng_alloc(gsl_rng_mt19937);
 
@@ -18,7 +19,7 @@ void message(){
     
     for (int j = 0; j < numberOfWords; j++){
         for (int i = 0; i < wordLenght; i++){
-            s[j][i] = 2 * (gsl_rng_uniform_int(pRNG,M ) ) + 1 - M;
+            s[j][i] = (2 * ( gsl_rng_uniform_int(pRNG,M) ) + 1 - M) * d;
 //            cout << "s[j][i]" << s[j][i] << "\n";
         }
     }
@@ -29,7 +30,7 @@ void noize(double SNR){
 //    cout << "sigma = " << sigma << "\n";
     for (int j = 0; j < numberOfWords; j++){
         for (int i = 0; i < wordLenght; i++){
-            r[j][i] = (double)s[j][i] + gsl_ran_gaussian(pRNG,sigma);
+            r[j][i] = s[j][i] + gsl_ran_gaussian(pRNG,sigma);
 //            cout << "gsl_ran_gaussian(pRNG,sigma) = " << gsl_ran_gaussian(pRNG,sigma) << "\n";
 //            cout << "r[j][i] = " << r[j][i] << "\n";
         }
@@ -37,27 +38,27 @@ void noize(double SNR){
 }
 
 double errorProbabilityPerSymbol (){
-    int *t = (int*)malloc(M * sizeof(int));
-//    cout << "\nM = " <<M;
-    for (int m = 0; m <= (M) ; m++) {
-//        t[m] = fabs((2*m - M) * pow(1/2, 1/2));
-        t[m] = 2*m - M;
-//        cout << "\nt[m] = " << t[m];
+    double *t = (double*)malloc((M+1) * sizeof(double));
+    cout << "\nM = " <<M;
+    for (int m = 0; m <= M ; m++) {
+        t[m] = (2*m - M) * d;
+//        t[m] = 2*m - M;
+        cout << "\nt[m] = " << t[m];
     }
     for (int wordNumber = 0; wordNumber < numberOfWords; wordNumber++){
         for (int numberOfSymbolInWord=0; numberOfSymbolInWord < wordLenght ; numberOfSymbolInWord++){
 //            cout << "\n\nr = " << r[wordNumber][numberOfSymbolInWord];
             if (r[wordNumber][numberOfSymbolInWord] >= t[M]) {
-                sPrediction[wordNumber][numberOfSymbolInWord] = t[M] - 1;
+                sPrediction[wordNumber][numberOfSymbolInWord] = t[M] - d;
                 break;
             }else{
                 if (r[wordNumber][numberOfSymbolInWord] < t[0]) {
-                    sPrediction[wordNumber][numberOfSymbolInWord] = t[0] + 1;
+                    sPrediction[wordNumber][numberOfSymbolInWord] = t[0] + d;
                     break;
                 }else{
                     for (int m = 0; m < M ; m++) {
                         if (r[wordNumber][numberOfSymbolInWord] >= t[m] && r[wordNumber][numberOfSymbolInWord] < t[m+1]) {
-                            sPrediction[wordNumber][numberOfSymbolInWord] = t[m] + 1;
+                            sPrediction[wordNumber][numberOfSymbolInWord] = t[m] + d;
 //                            cout << "\nm = " << m;
 //                            cout << "\nt1 = " << t[m];
 //                            cout << "\nt2 = " << t[m+1];
@@ -83,19 +84,21 @@ int main(int argc, const char * argv[])
 {
     ofstream outfile2 ("/Users/mike/Documents/Study/8semestr/Telecom/lab1/lab1/example.txt");
     
-    sPrediction = (int**)malloc(numberOfWords * sizeof(int*));
-    s = (int**)malloc(numberOfWords * sizeof(int*));
+    sPrediction = (double **)malloc(numberOfWords * sizeof(double*));
+    s = (double**)malloc(numberOfWords * sizeof(double*));
     r = (double**)malloc(numberOfWords * sizeof(double*));
     
     for (int wordNumber = 0; wordNumber < numberOfWords ; wordNumber++){
-        sPrediction[wordNumber] = (int*)malloc(wordLenght*sizeof(int));
-        s[wordNumber] = (int*)malloc(wordLenght*sizeof(int));
+        sPrediction[wordNumber] = (double*)malloc(wordLenght*sizeof(double));
+        s[wordNumber] = (double*)malloc(wordLenght*sizeof(double));
         r[wordNumber] = (double*)malloc(wordLenght*sizeof(double));
     }
     
     for (double SNR = -5; SNR <= 20; SNR += 0.5) {
             outfile2 << SNR;
         for (M=2; M<=16; M*=2) {
+            d = sqrt(3 / (pow(M,2) - 1));
+            cout << "d = " << d << "\n";
             numberOfSymbolsErrorsOverall = 0;
             
             message();
@@ -105,7 +108,7 @@ int main(int argc, const char * argv[])
             outfile2 << " " << errorProbabilityPerSymbol();
         }
         outfile2 << "\n";
-        cout << SNR << "\n";
+        cout << "\n\n" << SNR << "\n";
     }
     
     return 0;

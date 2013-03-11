@@ -3,26 +3,6 @@
    version = "1.0">
    <ContextStates>
       <ContextState
-         contextName = "errorProbabilityPerSymbol():main.cpp">
-         <PersistentStrings>
-            <PersistentString
-               value = "t[4]">
-            </PersistentString>
-            <PersistentString
-               value = "sPrediction[wordNumber][numberOfSymbolInWord]">
-            </PersistentString>
-            <PersistentString
-               value = "r[wordNumber][numberOfSymbolInWord]">
-            </PersistentString>
-            <PersistentString
-               value = "s[wordNumber][numberOfSymbolInWord]">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "main:main.cpp">
-      </ContextState>
-      <ContextState
          contextName = "noize(int*, double, gsl_rng*, int):main.cpp">
          <PersistentStrings>
             <PersistentString
@@ -54,6 +34,32 @@
             </PersistentString>
             <PersistentString
                value = "r[1]">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "main:main.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "errorProbabilityPerSymbol():main.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "t[M]">
+            </PersistentString>
+            <PersistentString
+               value = "sPrediction[wordNumber][numberOfSymbolInWord]">
+            </PersistentString>
+            <PersistentString
+               value = "t[m]">
+            </PersistentString>
+            <PersistentString
+               value = "t[0]">
+            </PersistentString>
+            <PersistentString
+               value = "r[wordNumber][numberOfSymbolInWord]">
+            </PersistentString>
+            <PersistentString
+               value = "s[wordNumber][numberOfSymbolInWord]">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
