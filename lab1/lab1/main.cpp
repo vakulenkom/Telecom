@@ -16,10 +16,13 @@ int numberOfSymbolsErrorsOverall;
 gsl_rng *pRNG = gsl_rng_alloc(gsl_rng_mt19937);
 
 void message(){
-    
+    double p = 0;
     for (int j = 0; j < numberOfWords; j++){
         for (int i = 0; i < wordLenght; i++){
-            s[j][i] = (2 * ( gsl_rng_uniform_int(pRNG,M) ) + 1 - M) * d;
+            p = gsl_rng_uniform_int(pRNG,M);
+            s[j][i] = (2 * p + 1 - M) * d;
+//            s[j][i] = 2 * p + 1 - M ;
+//            cout << "  s = " << s[j][i] << "\n" ;
 //            cout << "s[j][i]" << s[j][i] << "\n";
         }
     }
@@ -39,11 +42,11 @@ void noize(double SNR){
 
 double errorProbabilityPerSymbol (){
     double *t = (double*)malloc((M+1) * sizeof(double));
-    cout << "\nM = " <<M;
+//    cout << "\nM = " <<M;
     for (int m = 0; m <= M ; m++) {
         t[m] = (2*m - M) * d;
 //        t[m] = 2*m - M;
-        cout << "\nt[m] = " << t[m];
+//        cout << "\nt[m] = " << t[m];
     }
     for (int wordNumber = 0; wordNumber < numberOfWords; wordNumber++){
         for (int numberOfSymbolInWord=0; numberOfSymbolInWord < wordLenght ; numberOfSymbolInWord++){
@@ -70,6 +73,8 @@ double errorProbabilityPerSymbol (){
 //            cout << "\nsPrediction = " << sPrediction[wordNumber][numberOfSymbolInWord];
             if (sPrediction[wordNumber][numberOfSymbolInWord]!=s[wordNumber][numberOfSymbolInWord] ) {
                 numberOfSymbolsErrorsOverall += 1;
+//                cout << "sPrediction = " << sPrediction[wordNumber][numberOfSymbolInWord] << "  s = " << s[wordNumber][numberOfSymbolInWord] << "\n";
+            }else{
 //                cout << "sPrediction = " << sPrediction[wordNumber][numberOfSymbolInWord] << "  s = " << s[wordNumber][numberOfSymbolInWord] << "\n";
             }
 
@@ -98,7 +103,7 @@ int main(int argc, const char * argv[])
             outfile2 << SNR;
         for (M=2; M<=16; M*=2) {
             d = sqrt(3 / (pow(M,2) - 1));
-            cout << "d = " << d << "\n";
+//            cout << "d = " << d << "\n";
             numberOfSymbolsErrorsOverall = 0;
             
             message();
