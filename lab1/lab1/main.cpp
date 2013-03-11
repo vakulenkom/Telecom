@@ -5,8 +5,8 @@
 
 using namespace std;
 
-const int numberOfWords = 10000;
-const int wordLenght = 10 ;
+const int numberOfWords = 3;
+const int wordLenght = 100000 ;
 double **sPrediction;
 double **s;
 double **r;
@@ -16,11 +16,11 @@ int numberOfSymbolsErrorsOverall;
 gsl_rng *pRNG = gsl_rng_alloc(gsl_rng_mt19937);
 
 void message(){
-    double p = 0;
+    double m;
     for (int j = 0; j < numberOfWords; j++){
         for (int i = 0; i < wordLenght; i++){
-            p = gsl_rng_uniform_int(pRNG,M);
-            s[j][i] = (2 * p + 1 - M) * d;
+            m = gsl_rng_uniform_int(pRNG,M);
+            s[j][i] = (2 * m + 1 - M) * d;
 //            s[j][i] = 2 * p + 1 - M ;
 //            cout << "  s = " << s[j][i] << "\n" ;
 //            cout << "s[j][i]" << s[j][i] << "\n";
@@ -53,11 +53,9 @@ double errorProbabilityPerSymbol (){
 //            cout << "\n\nr = " << r[wordNumber][numberOfSymbolInWord];
             if (r[wordNumber][numberOfSymbolInWord] >= t[M]) {
                 sPrediction[wordNumber][numberOfSymbolInWord] = t[M] - d;
-                break;
             }else{
                 if (r[wordNumber][numberOfSymbolInWord] < t[0]) {
                     sPrediction[wordNumber][numberOfSymbolInWord] = t[0] + d;
-                    break;
                 }else{
                     for (int m = 0; m < M ; m++) {
                         if (r[wordNumber][numberOfSymbolInWord] >= t[m] && r[wordNumber][numberOfSymbolInWord] < t[m+1]) {
@@ -81,7 +79,6 @@ double errorProbabilityPerSymbol (){
         }
     }
     return (double)numberOfSymbolsErrorsOverall/ (double)(numberOfWords*wordLenght);
-
 }
 
 
@@ -92,6 +89,10 @@ int main(int argc, const char * argv[])
     sPrediction = (double **)malloc(numberOfWords * sizeof(double*));
     s = (double**)malloc(numberOfWords * sizeof(double*));
     r = (double**)malloc(numberOfWords * sizeof(double*));
+    
+//    sPrediction = (double **)malloc(numberOfWords * wordLenght * sizeof(double));
+//    s = (double**)malloc(numberOfWords * wordLenght * sizeof(double));
+//    r = (double**)malloc(numberOfWords * wordLenght * sizeof(double));
     
     for (int wordNumber = 0; wordNumber < numberOfWords ; wordNumber++){
         sPrediction[wordNumber] = (double*)malloc(wordLenght*sizeof(double));
@@ -109,8 +110,8 @@ int main(int argc, const char * argv[])
             message();
             noize(SNR);
             
-//            cout << "numberOfSymbolsErrorsOverall = " << numberOfSymbolsErrorsOverall << "numberOfSymbols = " << (numberOfWords*wordLenght)<<"\n";
             outfile2 << " " << errorProbabilityPerSymbol();
+//            cout << "numberOfSymbolsErrorsOverall = " << numberOfSymbolsErrorsOverall << " numberOfSymbols = " << (numberOfWords*wordLenght)<<"\n";
         }
         outfile2 << "\n";
         cout << "\n\n" << SNR << "\n";
