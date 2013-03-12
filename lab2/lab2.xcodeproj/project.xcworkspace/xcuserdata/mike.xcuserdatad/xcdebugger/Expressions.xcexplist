@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "errorProbabilityPerSymbol():main.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "s[wordNumber][numberOfSymbolInWord]">
+            </PersistentString>
+            <PersistentString
+               value = "sPrediction[wordNumber][numberOfSymbolInWord]">
+            </PersistentString>
+            <PersistentString
+               value = "t[m]">
+            </PersistentString>
+            <PersistentString
+               value = "t[0]">
+            </PersistentString>
+            <PersistentString
+               value = "t[M]">
+            </PersistentString>
+            <PersistentString
+               value = "r[wordNumber][numberOfSymbolInWord]">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "noize(int*, double, gsl_rng*, int):main.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "r[2]">
+            </PersistentString>
+            <PersistentString
+               value = "n[0]">
+            </PersistentString>
+            <PersistentString
+               value = "n[1]">
+            </PersistentString>
+            <PersistentString
+               value = "n[2]">
+            </PersistentString>
+            <PersistentString
+               value = "n[3]">
+            </PersistentString>
+            <PersistentString
+               value = "n[4]">
+            </PersistentString>
+            <PersistentString
+               value = "s[0]">
+            </PersistentString>
+            <PersistentString
+               value = "s[1]">
+            </PersistentString>
+            <PersistentString
+               value = "s[2]">
+            </PersistentString>
+            <PersistentString
+               value = "r[1]">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "message():main.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "s[j][i]">
+            </PersistentString>
+            <PersistentString
+               value = "p">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "main:main.cpp">
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>
