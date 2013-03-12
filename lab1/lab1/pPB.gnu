@@ -2,6 +2,8 @@ set terminal png
 set output "pPB_SNR all.png"
 
 set logscale y
+set grid xtics ytics mytics
+set mytics 10
 set format y "10^{%L}"
 
 set grid ytics lc rgb "#bbbbbb" lw 1 lt 0

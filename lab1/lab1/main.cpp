@@ -5,23 +5,47 @@
 
 using namespace std;
 
-const int numberOfWords = 3;
-const int wordLenght = 100000 ;
+const int numberOfWords = 1000;
+const int wordLenght = 1000;
 double **sPrediction;
 double **s;
 double **r;
 int M;
 double d;
+bool bit = false;
+int mTrue;
 int numberOfSymbolsErrorsOverall;
 gsl_rng *pRNG = gsl_rng_alloc(gsl_rng_mt19937);
+
+unsigned short binaryToGray(unsigned short num)
+{
+    return (num>>1) ^ num;
+}
+
+
+int NumOfBits(unsigned ch)
+{
+    int r = 1;
+    int summ = 0; // сумма битов
+    for(int i=0;i<log2(M); i++)
+    {
+        if((ch & r)  > 0)
+        {
+            summ++;
+        }
+        r <<= 1;
+    }
+    return summ;
+}
 
 void message(){
     double m;
     for (int j = 0; j < numberOfWords; j++){
         for (int i = 0; i < wordLenght; i++){
+            
             m = gsl_rng_uniform_int(pRNG,M);
+            
             s[j][i] = (2 * m + 1 - M) * d;
-//            s[j][i] = 2 * p + 1 - M ;
 //            cout << "  s = " << s[j][i] << "\n" ;
 //            cout << "s[j][i]" << s[j][i] << "\n";
         }
@@ -52,13 +76,16 @@ double errorProbabilityPerSymbol (){
         for (int numberOfSymbolInWord=0; numberOfSymbolInWord < wordLenght ; numberOfSymbolInWord++){
 //            cout << "\n\nr = " << r[wordNumber][numberOfSymbolInWord];
             if (r[wordNumber][numberOfSymbolInWord] >= t[M]) {
+                mTrue = M;
                 sPrediction[wordNumber][numberOfSymbolInWord] = t[M] - d;
             }else{
                 if (r[wordNumber][numberOfSymbolInWord] < t[0]) {
+                    mTrue = 0;
                     sPrediction[wordNumber][numberOfSymbolInWord] = t[0] + d;
                 }else{
                     for (int m = 0; m < M ; m++) {
                         if (r[wordNumber][numberOfSymbolInWord] >= t[m] && r[wordNumber][numberOfSymbolInWord] < t[m+1]) {
+                            mTrue = m;
                             sPrediction[wordNumber][numberOfSymbolInWord] = t[m] + d;
 //                            cout << "\nm = " << m;
 //                            cout << "\nt1 = " << t[m];
@@ -68,17 +95,34 @@ double errorProbabilityPerSymbol (){
                     }
                 }
             }
-//            cout << "\nsPrediction = " << sPrediction[wordNumber][numberOfSymbolInWord];
-            if (sPrediction[wordNumber][numberOfSymbolInWord]!=s[wordNumber][numberOfSymbolInWord] ) {
-                numberOfSymbolsErrorsOverall += 1;
-//                cout << "sPrediction = " << sPrediction[wordNumber][numberOfSymbolInWord] << "  s = " << s[wordNumber][numberOfSymbolInWord] << "\n";
+            if (bit) {
+                int mSource = (int)fabs( (s[wordNumber][numberOfSymbolInWord] / d + M - 1) / 2 );
+    //            cout << "\na = " << a;
+
+                unsigned XOR = binaryToGray(mTrue) ^ binaryToGray(mSource);
+                if (XOR > 0){
+    //                cout << "\nb = " << b;
+                    numberOfSymbolsErrorsOverall += NumOfBits(XOR);
+//                    cout <<  "\nnumOfBits = " << NumOfBits(XOR);
+//                    numberOfSymbolsErrorsOverall += 1;
+                }
             }else{
-//                cout << "sPrediction = " << sPrediction[wordNumber][numberOfSymbolInWord] << "  s = " << s[wordNumber][numberOfSymbolInWord] << "\n";
+//                cout << "\nsPrediction = " << sPrediction[wordNumber][numberOfSymbolInWord];
+                if (sPrediction[wordNumber][numberOfSymbolInWord]!=s[wordNumber][numberOfSymbolInWord] ) {
+                    numberOfSymbolsErrorsOverall += 1;
+    //                cout << "sPrediction = " << sPrediction[wordNumber][numberOfSymbolInWord] << "  s = " << s[wordNumber][numberOfSymbolInWord] << "\n";
+                }else{
+    //                cout << "sPrediction = " << sPrediction[wordNumber][numberOfSymbolInWord] << "  s = " << s[wordNumber][numberOfSymbolInWord] << "\n";
+                }
             }
 
         }
     }
-    return (double)numberOfSymbolsErrorsOverall/ (double)(numberOfWords*wordLenght);
+    if (bit) {
+        return (double)numberOfSymbolsErrorsOverall/ (double)(log2(M)*numberOfWords*wordLenght);
+    }else{
+        return (double)numberOfSymbolsErrorsOverall/ (double)(numberOfWords*wordLenght);
+    }
 }
 
 
@@ -89,7 +133,6 @@ int main(int argc, const char * argv[])
     sPrediction = (double **)malloc(numberOfWords * sizeof(double*));
     s = (double**)malloc(numberOfWords * sizeof(double*));
     r = (double**)malloc(numberOfWords * sizeof(double*));
-    
 //    sPrediction = (double **)malloc(numberOfWords * wordLenght * sizeof(double));
 //    s = (double**)malloc(numberOfWords * wordLenght * sizeof(double));
 //    r = (double**)malloc(numberOfWords * wordLenght * sizeof(double));
@@ -104,7 +147,7 @@ int main(int argc, const char * argv[])
             outfile2 << SNR;
         for (M=2; M<=16; M*=2) {
             d = sqrt(3 / (pow(M,2) - 1));
-//            cout << "d = " << d << "\n";
+            
             numberOfSymbolsErrorsOverall = 0;
             
             message();
