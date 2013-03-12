@@ -6,14 +6,14 @@
 using namespace std;
 
 const int numberOfWords = 1000;
-const int wordLenght = 1000;
+const int wordLenght = 100;
 double **sPrediction;
 double **s;
 double **r;
 int M;
 double d;
-bool bit = false;
-int mTrue;
+bool bit = true;
+int signalLevelPrediction;
 int numberOfSymbolsErrorsOverall;
 gsl_rng *pRNG = gsl_rng_alloc(gsl_rng_mt19937);
 
@@ -22,8 +22,19 @@ unsigned short binaryToGray(unsigned short num)
     return (num>>1) ^ num;
 }
 
+unsigned short grayToBinary(unsigned short gray)
+{
+    unsigned short result = gray & 64;
+    result |= (gray ^ (result >> 1)) & 32;
+    result |= (gray ^ (result >> 1)) & 16;
+    result |= (gray ^ (result >> 1)) & 8;
+    result |= (gray ^ (result >> 1)) & 4;
+    result |= (gray ^ (result >> 1)) & 2;
+    result |= (gray ^ (result >> 1)) & 1;
+    return result;
+}
 
-int NumOfBits(unsigned ch)
+int NumOf1Bits(unsigned ch)
 {
     int r = 1;
     int summ = 0; // сумма битов
@@ -40,14 +51,26 @@ int NumOfBits(unsigned ch)
 
 void message(){
     double m;
+    unsigned binaryVector;
     for (int j = 0; j < numberOfWords; j++){
         for (int i = 0; i < wordLenght; i++){
-            
-            m = gsl_rng_uniform_int(pRNG,M);
+            if (bit) {
+                binaryVector = 0;
+                for (int k=0; k<log2(M); k++) {
+                    binaryVector += (unsigned) gsl_rng_uniform_int(pRNG,2);
+                    binaryVector <<= 1;
+                }
+                binaryVector >>= 1;
+//                cout << "  binaryVector = " << binaryVector << "\n" ;
+                m = grayToBinary(binaryVector);
+//                cout << "  m = " << m << "\n" ;
+            }
+            else{
+                m = gsl_rng_uniform_int(pRNG,M);
+            }
             
             s[j][i] = (2 * m + 1 - M) * d;
-//            cout << "  s = " << s[j][i] << "\n" ;
-//            cout << "s[j][i]" << s[j][i] << "\n";
+//            cout << "s/d = " << s[j][i]/d << "\n";
         }
     }
 }
@@ -76,16 +99,16 @@ double errorProbabilityPerSymbol (){
         for (int numberOfSymbolInWord=0; numberOfSymbolInWord < wordLenght ; numberOfSymbolInWord++){
 //            cout << "\n\nr = " << r[wordNumber][numberOfSymbolInWord];
             if (r[wordNumber][numberOfSymbolInWord] >= t[M]) {
-                mTrue = M;
+                signalLevelPrediction = M;
                 sPrediction[wordNumber][numberOfSymbolInWord] = t[M] - d;
             }else{
                 if (r[wordNumber][numberOfSymbolInWord] < t[0]) {
-                    mTrue = 0;
+                    signalLevelPrediction = 0;
                     sPrediction[wordNumber][numberOfSymbolInWord] = t[0] + d;
                 }else{
                     for (int m = 0; m < M ; m++) {
                         if (r[wordNumber][numberOfSymbolInWord] >= t[m] && r[wordNumber][numberOfSymbolInWord] < t[m+1]) {
-                            mTrue = m;
+                            signalLevelPrediction = m;
                             sPrediction[wordNumber][numberOfSymbolInWord] = t[m] + d;
 //                            cout << "\nm = " << m;
 //                            cout << "\nt1 = " << t[m];
@@ -99,10 +122,10 @@ double errorProbabilityPerSymbol (){
                 int mSource = (int)fabs( (s[wordNumber][numberOfSymbolInWord] / d + M - 1) / 2 );
     //            cout << "\na = " << a;
 
-                unsigned XOR = binaryToGray(mTrue) ^ binaryToGray(mSource);
+                unsigned XOR = binaryToGray(signalLevelPrediction) ^ binaryToGray(mSource);
                 if (XOR > 0){
     //                cout << "\nb = " << b;
-                    numberOfSymbolsErrorsOverall += NumOfBits(XOR);
+                    numberOfSymbolsErrorsOverall += NumOf1Bits(XOR);
 //                    cout <<  "\nnumOfBits = " << NumOfBits(XOR);
 //                    numberOfSymbolsErrorsOverall += 1;
                 }
