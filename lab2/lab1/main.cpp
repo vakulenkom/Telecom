@@ -2,14 +2,16 @@
 #include <math.h>
 #include <iostream>
 #include <fstream>
+#include <complex>
 
 using namespace std;
 
+
 const int numberOfWords = 1000;
 const int wordLenght = 100;
-double **sPrediction;
-double **s;
-double **r;
+complex<double> **sPrediction;
+complex<double> **s;
+complex<double> **r;
 int M;
 double d;
 bool bit = true;
@@ -66,10 +68,11 @@ void message(){
 //                cout << "  m = " << m << "\n" ;
             }
             else{
+                
                 m = gsl_rng_uniform_int(pRNG,M);
             }
-            
-            s[j][i] = (2 * m + 1 - M) * d;
+            s[j][i].real(cos(2 * M_PI * m/ (double)M));
+            s[j][i].imag(sin(2 * M_PI * m/ (double)M));
 //            cout << "s/d = " << s[j][i]/d << "\n";
         }
     }
@@ -80,7 +83,9 @@ void noize(double SNR){
 //    cout << "sigma = " << sigma << "\n";
     for (int j = 0; j < numberOfWords; j++){
         for (int i = 0; i < wordLenght; i++){
-            r[j][i] = s[j][i] + gsl_ran_gaussian(pRNG,sigma);
+            r[j][i].real(s[j][i].real() + gsl_ran_gaussian(pRNG,sigma));
+            r[j][i].imag(s[j][i].imag() + gsl_ran_gaussian(pRNG,sigma));
+            
 //            cout << "gsl_ran_gaussian(pRNG,sigma) = " << gsl_ran_gaussian(pRNG,sigma) << "\n";
 //            cout << "r[j][i] = " << r[j][i] << "\n";
         }
@@ -88,47 +93,30 @@ void noize(double SNR){
 }
 
 double errorProbabilityPerSymbol (){
-    double *t = (double*)malloc((M+1) * sizeof(double));
-//    cout << "\nM = " <<M;
-    for (int m = 0; m <= M ; m++) {
-        t[m] = (2*m - M) * d;
-//        t[m] = 2*m - M;
-//        cout << "\nt[m] = " << t[m];
-    }
     for (int wordNumber = 0; wordNumber < numberOfWords; wordNumber++){
         for (int numberOfSymbolInWord=0; numberOfSymbolInWord < wordLenght ; numberOfSymbolInWord++){
 //            cout << "\n\nr = " << r[wordNumber][numberOfSymbolInWord];
-            if (r[wordNumber][numberOfSymbolInWord] >= t[M]) {
-                signalLevelPrediction = M;
-                sPrediction[wordNumber][numberOfSymbolInWord] = t[M] - d;
-            }else{
-                if (r[wordNumber][numberOfSymbolInWord] < t[0]) {
-                    signalLevelPrediction = 0;
-                    sPrediction[wordNumber][numberOfSymbolInWord] = t[0] + d;
-                }else{
-                    for (int m = 0; m < M ; m++) {
-                        if (r[wordNumber][numberOfSymbolInWord] >= t[m] && r[wordNumber][numberOfSymbolInWord] < t[m+1]) {
-                            signalLevelPrediction = m;
-                            sPrediction[wordNumber][numberOfSymbolInWord] = t[m] + d;
-//                            cout << "\nm = " << m;
-//                            cout << "\nt1 = " << t[m];
-//                            cout << "\nt2 = " << t[m+1];
-                            break;
-                        }
-                    }
+            double arctgR = atan(r[wordNumber][numberOfSymbolInWord].real() / r[wordNumber][numberOfSymbolInWord].imag());
+            double minDist = 1;
+            for (int i = 0; i < M; i++) {
+                double arctgA = atan(cos(2 * M_PI * i/ (double)M) / sin(2 * M_PI * i/ (double)M));
+                if (fabs(arctgA - arctgR) < minDist){
+                    minDist = fabs(arctgA - arctgR);
+                    sPrediction[wordNumber][numberOfSymbolInWord].real(cos(2 * M_PI * i/ (double)M));
+                    sPrediction[wordNumber][numberOfSymbolInWord].imag(sin(2 * M_PI * i/ (double)M));
                 }
             }
             if (bit) {
-                int mSource = (int)fabs( (s[wordNumber][numberOfSymbolInWord] / d + M - 1) / 2 );
-    //            cout << "\na = " << a;
-
-                unsigned XOR = binaryToGray(signalLevelPrediction) ^ binaryToGray(mSource);
-                if (XOR > 0){
-    //                cout << "\nb = " << b;
-                    numberOfSymbolsErrorsOverall += NumOf1Bits(XOR);
-//                    cout <<  "\nnumOfBits = " << NumOfBits(XOR);
-//                    numberOfSymbolsErrorsOverall += 1;
-                }
+//                int mSource = (int)fabs( (s[wordNumber][numberOfSymbolInWord] / d + M - 1) / 2 );
+//    //            cout << "\na = " << a;
+//
+//                unsigned XOR = binaryToGray(signalLevelPrediction) ^ binaryToGray(mSource);
+//                if (XOR > 0){
+//    //                cout << "\nb = " << b;
+//                    numberOfSymbolsErrorsOverall += NumOf1Bits(XOR);
+////                    cout <<  "\nnumOfBits = " << NumOfBits(XOR);
+////                    numberOfSymbolsErrorsOverall += 1;
+//                }
             }else{
 //                cout << "\nsPrediction = " << sPrediction[wordNumber][numberOfSymbolInWord];
                 if (sPrediction[wordNumber][numberOfSymbolInWord]!=s[wordNumber][numberOfSymbolInWord] ) {
@@ -153,17 +141,17 @@ int main(int argc, const char * argv[])
 {
     ofstream outfile2 ("/Users/mike/Documents/Study/8semestr/Telecom/lab1/lab1/example.txt");
     
-    sPrediction = (double **)malloc(numberOfWords * sizeof(double*));
-    s = (double**)malloc(numberOfWords * sizeof(double*));
-    r = (double**)malloc(numberOfWords * sizeof(double*));
+    sPrediction = (complex<double> **)malloc(numberOfWords * sizeof(complex<double>*));
+    s = (complex<double>**)malloc(numberOfWords * sizeof(complex<double>*));
+    r = (complex<double>**)malloc(numberOfWords * sizeof(complex<double>*));
 //    sPrediction = (double **)malloc(numberOfWords * wordLenght * sizeof(double));
 //    s = (double**)malloc(numberOfWords * wordLenght * sizeof(double));
 //    r = (double**)malloc(numberOfWords * wordLenght * sizeof(double));
     
     for (int wordNumber = 0; wordNumber < numberOfWords ; wordNumber++){
-        sPrediction[wordNumber] = (double*)malloc(wordLenght*sizeof(double));
-        s[wordNumber] = (double*)malloc(wordLenght*sizeof(double));
-        r[wordNumber] = (double*)malloc(wordLenght*sizeof(double));
+        sPrediction[wordNumber] = (complex<double>*)malloc(wordLenght*sizeof(complex<double>));
+        s[wordNumber] = (complex<double>*)malloc(wordLenght*sizeof(complex<double>));
+        r[wordNumber] = (complex<double>*)malloc(wordLenght*sizeof(complex<double>));
     }
     
     for (double SNR = -5; SNR <= 20; SNR += 0.5) {
