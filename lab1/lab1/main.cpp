@@ -166,7 +166,7 @@ int main(int argc, const char * argv[])
         r[wordNumber] = (double*)malloc(wordLenght*sizeof(double));
     }
     
-    for (double SNR = -5; SNR <= 20; SNR += 0.5) {
+    for (double SNR = 100; SNR <= 100; SNR += 0.5) {
             outfile2 << SNR;
         for (M=2; M<=16; M*=2) {
             d = sqrt(3 / (pow(M,2) - 1));
