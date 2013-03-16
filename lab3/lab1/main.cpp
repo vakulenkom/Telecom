@@ -13,7 +13,7 @@ complex<double> **s;
 complex<double> **r;
 int M;
 double d;
-bool bit = false;
+bool bit = true;
 int signalLevelPrediction[2];
 int numberOfSymbolsErrorsOverall;
 gsl_rng *pRNG = gsl_rng_alloc(gsl_rng_mt19937);
@@ -191,7 +191,7 @@ double errorProbabilityPerSymbol (){
         }
     }
     if (bit) {
-        return (double)numberOfSymbolsErrorsOverall/ (double)(log2(M)*numberOfWords*wordLenght*2.0);
+        return (double)numberOfSymbolsErrorsOverall/ (double)(log2(M)*numberOfWords*wordLenght);
     }else{
         return (double)numberOfSymbolsErrorsOverall/ (double)(numberOfWords*wordLenght);
     }
