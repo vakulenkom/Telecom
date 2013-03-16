@@ -156,10 +156,6 @@ int main(int argc, const char * argv[])
     r = (complex<double>**)malloc(numberOfWords * sizeof(complex<double>*));
     sourceMLevel = (int**)malloc(numberOfWords * sizeof(int*));
     
-//    sPrediction = (double **)malloc(numberOfWords * wordLenght * sizeof(double));
-//    s = (double**)malloc(numberOfWords * wordLenght * sizeof(double));
-//    r = (double**)malloc(numberOfWords * wordLenght * sizeof(double));
-    
     for (int wordNumber = 0; wordNumber < numberOfWords ; wordNumber++){
         sPrediction[wordNumber] = (complex<double>*)malloc(wordLenght*sizeof(complex<double>));
         s[wordNumber] = (complex<double>*)malloc(wordLenght*sizeof(complex<double>));
