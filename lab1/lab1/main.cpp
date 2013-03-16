@@ -119,12 +119,16 @@ double errorProbabilityPerSymbol (){
                 }
             }
             if (bit) {
-                int mSource = (int)fabs( (s[wordNumber][numberOfSymbolInWord] / d + M - 1) / 2 );
-    //            cout << "\na = " << a;
+//                спросить почему когда 1 - дабл приводиш к инту получается 0
+                int mSource = 0.0001+ fabs( (s[wordNumber][numberOfSymbolInWord] / d + (double)M - 1.0) / 2.0 );
+                
 
                 unsigned XOR = binaryToGray(signalLevelPrediction) ^ binaryToGray(mSource);
                 if (XOR > 0){
-    //                cout << "\nb = " << b;
+//                    cout << "\ns[wordNumber][numberOfSymbolInWord] / d + (double)M = " << fabs((s[wordNumber][numberOfSymbolInWord] / d + (double)M - 1.0) / 2.0);
+//                    cout << "sPrediction = " << sPrediction[wordNumber][numberOfSymbolInWord] << "  s = " << s[wordNumber][numberOfSymbolInWord] << "\n";
+
+//                    cout << "\nsignalLevelPrediction = " << signalLevelPrediction << "  mSource = " <<  mSource;
                     numberOfSymbolsErrorsOverall += NumOf1Bits(XOR);
 //                    cout <<  "\nnumOfBits = " << NumOfBits(XOR);
 //                    numberOfSymbolsErrorsOverall += 1;
@@ -166,7 +170,7 @@ int main(int argc, const char * argv[])
         r[wordNumber] = (double*)malloc(wordLenght*sizeof(double));
     }
     
-    for (double SNR = 100; SNR <= 100; SNR += 0.5) {
+    for (double SNR = -5; SNR <= 20; SNR += 0.5) {
             outfile2 << SNR;
         for (M=2; M<=16; M*=2) {
             d = sqrt(3 / (pow(M,2) - 1));

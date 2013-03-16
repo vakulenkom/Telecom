@@ -7,7 +7,7 @@
 using namespace std;
 
 const int numberOfWords = 1000;
-const int wordLenght = 10;
+const int wordLenght = 100;
 bool bit = false;
 
 complex<double> **sPrediction;
@@ -17,6 +17,8 @@ int M;
 int signalLevelPrediction;
 int numberOfSymbolsErrorsOverall;
 gsl_rng *pRNG = gsl_rng_alloc(gsl_rng_mt19937);
+
+int **sourceMLevel;
 
 unsigned short binaryToGray(unsigned short num)
 {
@@ -73,6 +75,7 @@ void message(){
 //            s[j][i] (cos(2 * M_PI * i/ (double)M), sin(2 * M_PI * i/ (double)M));
             s[j][i].real(cos(2 * M_PI * m/ (double)M));
             s[j][i].imag(sin(2 * M_PI * m/ (double)M));
+            sourceMLevel[j][i] = m;
 //            cout << "s = " << s[j][i] << "\n";
         }
     }
@@ -80,7 +83,6 @@ void message(){
 
 void noize(double SNR){
 	double sigma = sqrt(pow(10.0, -SNR/10.0) / (2.0 * log2(M) ));
-//    double sigma = sqrt(pow(10,-SNR/10)/6);
 //    cout << "sigma = " << sigma << "\n";
     for (int j = 0; j < numberOfWords; j++){
         for (int i = 0; i < wordLenght; i++){
@@ -105,19 +107,25 @@ double errorProbabilityPerSymbol (){
                 if (dist < minDist){
                     minDist = dist;
                     sPrediction[wordNumber][numberOfSymbolInWord] = a;
+                    signalLevelPrediction = i;
                 }
             }
             if (bit) {
-//                int mSource = (int)fabs( (s[wordNumber][numberOfSymbolInWord] / d + M - 1) / 2 );
+//                int mSource = acos( (s[wordNumber][numberOfSymbolInWord].real() * (double)M) / 2*M_PI);
 //    //            cout << "\na = " << a;
+//                cout << "\nsignalLevelPrediction = " << signalLevelPrediction << " mSource = " << mSource;
+                unsigned XOR = binaryToGray(signalLevelPrediction) ^ binaryToGray(sourceMLevel[wordNumber][numberOfSymbolInWord]);
+                if (XOR > 0){
+//                    cout << "\nXOR = " << XOR;
+//                    cout << "sPrediction = " << sPrediction[wordNumber][numberOfSymbolInWord] << "  s = " << s[wordNumber][numberOfSymbolInWord] << "\n";
+//                    
+//                    cout << "\nsignalLevelPrediction = " << signalLevelPrediction << "  mSource = " <<  mSource;
 //
-//                unsigned XOR = binaryToGray(signalLevelPrediction) ^ binaryToGray(mSource);
-//                if (XOR > 0){
-//    //                cout << "\nb = " << b;
-//                    numberOfSymbolsErrorsOverall += NumOf1Bits(XOR);
-////                    cout <<  "\nnumOfBits = " << NumOfBits(XOR);
-////                    numberOfSymbolsErrorsOverall += 1;
-//                }
+    //                cout << "\nb = " << b;
+                    numberOfSymbolsErrorsOverall += NumOf1Bits(XOR);
+//                    cout <<  "\nnumOfBits = " << NumOf1Bits(XOR);
+//                    numberOfSymbolsErrorsOverall += 1;
+                }
             }else{
 //                cout << "\nsPrediction = " << sPrediction[wordNumber][numberOfSymbolInWord];
                 if (sPrediction[wordNumber][numberOfSymbolInWord]!=s[wordNumber][numberOfSymbolInWord] ) {
@@ -146,6 +154,8 @@ int main(int argc, const char * argv[])
     sPrediction = (complex<double> **)malloc(numberOfWords * sizeof(complex<double>*));
     s = (complex<double>**)malloc(numberOfWords * sizeof(complex<double>*));
     r = (complex<double>**)malloc(numberOfWords * sizeof(complex<double>*));
+    sourceMLevel = (int**)malloc(numberOfWords * sizeof(int*));
+    
 //    sPrediction = (double **)malloc(numberOfWords * wordLenght * sizeof(double));
 //    s = (double**)malloc(numberOfWords * wordLenght * sizeof(double));
 //    r = (double**)malloc(numberOfWords * wordLenght * sizeof(double));
@@ -154,12 +164,15 @@ int main(int argc, const char * argv[])
         sPrediction[wordNumber] = (complex<double>*)malloc(wordLenght*sizeof(complex<double>));
         s[wordNumber] = (complex<double>*)malloc(wordLenght*sizeof(complex<double>));
         r[wordNumber] = (complex<double>*)malloc(wordLenght*sizeof(complex<double>));
+        sourceMLevel[wordNumber] = (int*)malloc(wordLenght*sizeof(int));
     }
+    
+    
     
     for (double SNR = -5; SNR <= 20; SNR += 0.5) {
             outfile2 << SNR;
         for (M=2; M<=16; M*=2) {
-            
+//            cout << "\n\nM = " << M;
             numberOfSymbolsErrorsOverall = 0;
             
             message();
